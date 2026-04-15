@@ -49,8 +49,11 @@ exports.sendMessage = async (req, res) => {
 exports.negotiateWebSocket = async (req, res) => {
   try {
     const token = await webPubSubClient.getClientAccessToken();
+    console.log("Web PubSub negotiate token:", token);
+
     return res.json({ url: token.url });
   } catch (error) {
+    console.error("NEGOTIATE ERROR:", error);
     return res.status(500).json({ message: error.message });
   }
 };
