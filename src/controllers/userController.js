@@ -19,9 +19,9 @@ exports.getAllUsers = async (req, res) => {
 
     return res.json(users);
   } catch (error) {
-    console.error("GET ALL USERS ERROR:", error);
-    return res.status(500).json({ message: error.message });
-  }
+      console.error("GET ALL USERS ERROR:", error);
+      return res.status(500).json({ message: error.message });
+   }
 };
 
 exports.saveProfile = async (req, res) => {

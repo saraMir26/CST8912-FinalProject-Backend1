@@ -19,6 +19,7 @@ exports.uploadImage = async (req, res) => {
       imageUrl: blockBlobClient.url
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+  console.error("UPLOAD ERROR:", error);
+  return res.status(500).json({ message: error.message });
   }
 };
