@@ -10,5 +10,6 @@ const {
 router.get("/", authMiddleware, getMessages);
 router.post("/", authMiddleware, sendMessage);
 router.get("/negotiate", authMiddleware, negotiateWebSocket);
+router.get("/users", authenticateToken, getUsers);
 
 module.exports = router;

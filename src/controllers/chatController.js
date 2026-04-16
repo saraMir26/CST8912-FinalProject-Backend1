@@ -4,11 +4,26 @@ const webPubSubClient = require("../config/webpubsub");
 
 exports.getMessages = async (req, res) => {
   try {
+    const userId = req.user.id;
+    const otherUserId = req.query.userId;
+
     const querySpec = {
-      query: "SELECT * FROM c ORDER BY c.createdAt ASC"
+      query: `
+        SELECT * FROM c 
+        WHERE 
+          (c.senderId = @userId AND c.receiverId = @otherUserId)
+          OR
+          (c.senderId = @otherUserId AND c.receiverId = @userId)
+        ORDER BY c.createdAt ASC
+      `,
+      parameters: [
+        { name: "@userId", value: userId },
+        { name: "@otherUserId", value: otherUserId }
+      ]
     };
 
     const { resources } = await messagesContainer.items.query(querySpec).fetchAll();
+
     return res.json(resources);
   } catch (error) {
     console.error("GET MESSAGES ERROR:", error);
@@ -18,31 +33,23 @@ exports.getMessages = async (req, res) => {
 
 exports.sendMessage = async (req, res) => {
   try {
-    const { text, chatRoom = "general" } = req.body;
-
-    if (!text) {
-      return res.status(400).json({ message: "Message text is required" });
-    }
+    const { text, receiverId } = req.body;
+    const senderId = req.user.id;
 
     const message = {
-      id: uuidv4(),
-      type: "message",
-      senderId: String(req.user.id),
+      id: Date.now().toString(),
+      senderId,
+      receiverId,
       senderName: req.user.username,
       text,
-      chatRoom,
       createdAt: new Date().toISOString()
     };
 
-    const { resource } = await messagesContainer.items.create(message);
+    await messagesContainer.items.create(message);
 
-    await webPubSubClient.sendToAll({
-      type: "message",
-      data: JSON.stringify(resource)
-    }, "jsonwebpubsub");
-
-    return res.status(201).json(resource);
+    return res.json(message);
   } catch (error) {
+    console.error("SEND MESSAGE ERROR:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -55,6 +62,20 @@ exports.negotiateWebSocket = async (req, res) => {
     return res.json({ url: token.url });
   } catch (error) {
     console.error("NEGOTIATE ERROR:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+exports.getUsers = async (req, res) => {
+  try {
+    const querySpec = {
+      query: "SELECT c.id, c.username FROM c"
+    };
+
+    const { resources } = await usersContainer.items.query(querySpec).fetchAll();
+
+    return res.json(resources);
+  } catch (error) {
+    console.error("GET USERS ERROR:", error);
     return res.status(500).json({ message: error.message });
   }
 };
