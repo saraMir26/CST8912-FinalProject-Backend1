@@ -39,3 +39,29 @@ exports.getProfile = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+const { getConnection, sql } = require("../config/sql");
+const { profilesContainer } = require("../config/cosmos");
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const pool = await getConnection();
+
+    const result = await pool.request().query(`
+      SELECT Id, Username, Email
+      FROM Users
+      ORDER BY Username ASC
+    `);
+
+    const users = result.recordset.map((user) => ({
+      id: String(user.Id),
+      username: user.Username,
+      email: user.Email
+    }));
+
+    return res.json(users);
+  } catch (error) {
+    console.error("GET ALL USERS ERROR:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
