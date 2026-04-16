@@ -11,6 +11,7 @@ exports.getMessages = async (req, res) => {
     const { resources } = await messagesContainer.items.query(querySpec).fetchAll();
     return res.json(resources);
   } catch (error) {
+    console.error("GET MESSAGES ERROR:", error);
     return res.status(500).json({ message: error.message });
   }
 };

@@ -30,6 +30,7 @@ exports.getPosts = async (req, res) => {
     const { resources } = await postsContainer.items.query(querySpec).fetchAll();
     return res.json(resources);
   } catch (error) {
+    console.error("GET POSTS ERROR:", error);
     return res.status(500).json({ message: error.message });
   }
 };

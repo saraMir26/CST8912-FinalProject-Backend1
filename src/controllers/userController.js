@@ -22,9 +22,20 @@ exports.saveProfile = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { resource } = await profilesContainer.item(`profile-${userId}`, `profile-${userId}`).read();
-    return res.json(resource);
+    const querySpec = {
+      query: "SELECT * FROM c WHERE c.userId = @userId",
+      parameters: [{ name: "@userId", value: String(userId) }]
+    };
+
+    const { resources } = await profilesContainer.items.query(querySpec).fetchAll();
+
+    if (resources.length === 0) {
+      return res.json({});
+    }
+
+    return res.json(resources[0]);
   } catch (error) {
+    console.error("GET PROFILE ERROR:", error);
     return res.status(500).json({ message: error.message });
   }
 };
