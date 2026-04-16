@@ -4,26 +4,25 @@ const webPubSubClient = require("../config/webpubsub");
 
 exports.getMessages = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const otherUserId = req.query.userId;
+    const currentUserId = String(req.user.id);
+    const otherUserId = String(req.query.userId);
 
     const querySpec = {
       query: `
-        SELECT * FROM c 
-        WHERE 
-          (c.senderId = @userId AND c.receiverId = @otherUserId)
+        SELECT * FROM c
+        WHERE
+          (c.senderId = @currentUserId AND c.receiverId = @otherUserId)
           OR
-          (c.senderId = @otherUserId AND c.receiverId = @userId)
+          (c.senderId = @otherUserId AND c.receiverId = @currentUserId)
         ORDER BY c.createdAt ASC
       `,
       parameters: [
-        { name: "@userId", value: userId },
+        { name: "@currentUserId", value: currentUserId },
         { name: "@otherUserId", value: otherUserId }
       ]
     };
 
     const { resources } = await messagesContainer.items.query(querySpec).fetchAll();
-
     return res.json(resources);
   } catch (error) {
     console.error("GET MESSAGES ERROR:", error);
@@ -34,20 +33,18 @@ exports.getMessages = async (req, res) => {
 exports.sendMessage = async (req, res) => {
   try {
     const { text, receiverId } = req.body;
-    const senderId = req.user.id;
 
     const message = {
       id: Date.now().toString(),
-      senderId,
-      receiverId,
+      senderId: String(req.user.id),
+      receiverId: String(receiverId),
       senderName: req.user.username,
       text,
       createdAt: new Date().toISOString()
     };
 
-    await messagesContainer.items.create(message);
-
-    return res.json(message);
+    const { resource } = await messagesContainer.items.create(message);
+    return res.json(resource);
   } catch (error) {
     console.error("SEND MESSAGE ERROR:", error);
     return res.status(500).json({ message: error.message });
