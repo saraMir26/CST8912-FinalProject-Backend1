@@ -2,11 +2,11 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-const { getConnection } = require("./config/sql");
-
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const postRoutes = require("./routes/postRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 
 const app = express();
 
@@ -36,19 +36,10 @@ app.get("/", (req, res) => {
   res.send("API is running");
 });
 
-app.get("/test-sql", async (req, res) => {
-  try {
-    const pool = await getConnection();
-    const result = await pool.request().query("SELECT 1 AS testValue");
-    res.json(result.recordset);
-  } catch (error) {
-    console.error("SQL TEST ERROR:", error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/upload", uploadRoutes);
 
 module.exports = app;
