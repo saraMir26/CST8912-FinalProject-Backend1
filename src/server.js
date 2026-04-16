@@ -1,4 +1,4 @@
-require("./utils/appInsights");
+//require("./utils/appInsights");
 const app = require("./app");
 
 const PORT = process.env.PORT || 5000;

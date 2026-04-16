@@ -11,17 +11,12 @@ const uploadRoutes = require("./routes/uploadRoutes");
 
 const app = express();
 
-const allowedOrigin =
-  "https://cst8912-final-chatbox-erh6d2gechfmh0h0.canadacentral-01.azurewebsites.net";
-
-app.use(
-  cors({
-    origin: allowedOrigin,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: "https://cst8912-final-chatbox-erh6d2gechfmh0h0.canadacentral-01.azurewebsites.net",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 
 app.use(express.json());
 
