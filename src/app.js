@@ -11,27 +11,20 @@ const uploadRoutes = require("./routes/uploadRoutes");
 
 const app = express();
 
-app.use(cors({
-  origin: "https://cst8912-final-chatbox-erh6d2gechfmh0h0.canadacentral-01.azurewebsites.net",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+console.log("app.js loaded with hardcoded CORS");
 
-//temporary CORS for development
-const { getConnection } = require("./config/sql");
+const allowedOrigin =
+  "https://cst8912-final-chatbox-erh6d2gechfmh0h0.canadacentral-01.azurewebsites.net";
 
-app.get("/test-sql", async (req, res) => {
-  try {
-    const pool = await getConnection();
-    const result = await pool.request().query("SELECT 1 AS testValue");
-    res.json(result.recordset);
-  } catch (error) {
-    console.error("SQL TEST ERROR:", error);
-    res.status(500).json({ message: error.message });
-  }
-});
-//until here
+app.use(
+  cors({
+    origin: allowedOrigin,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
